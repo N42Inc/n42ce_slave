@@ -23,7 +23,7 @@ event_dictionary={"start":"started","stop":"stopped"}
 config = {'host': '52.8.104.253', 'port': 6379, 'db': 0}
 docker_path="/var/lib/docker/containers"
 
-commands={"connections":"conntrack -L -p tcp | grep 'TIME_WAIT\|ESTABLISHED\|CLOSE'",
+commands={"connections":"conntrack -L -p tcp | grep -v UNREPLIED |grep 'TIME_WAIT\|ESTABLISHED\|CLOSE'",
             "interface_ips":"ip addr | grep -w inet",
             "bridges":"brctl show",
             "bridges_ips":"ip addr show {} | grep -w inet"}
