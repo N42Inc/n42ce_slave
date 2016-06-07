@@ -185,6 +185,9 @@ def parse_contrack():
         dependency.append(data)
     json_data=json.dumps(dependency)
     print "=================== Docker Dependencies ===================\n"
+    if not json_data:
+        json_data=[{"dsttenant":tenant_name}]
+        print "No Traffic Found!"
     print json_data
     response = requests.post(dependency_url, data=json_data,headers=headers)
     print response
