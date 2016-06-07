@@ -197,7 +197,12 @@ def find_new_flow(cid):
         if cid in dep[1]:
             print "Found new container's traffic :-)\n" 
             json_data=json.dumps(dep[0])
-            response = requests.post(dependency_url, data=json_data,headers=headers)
+            try:
+                response = requests.post(dependency_url, data=json_data,headers=headers)
+            except Exception:
+                print "*****Connection problem at REST API. Will try in 30 Sec"
+                time.sleep(30)
+                raise Exception
             print "=================== Docker Dependencies ===================\n"
             print json_data
             print response
@@ -215,8 +220,8 @@ def receive(channel):
             print '\n***** Listening to the channel {channel} *****'.format(**locals())
         except Exception:
             print traceback.format_exc()
-            print "\nThere seem to be connection problem! :-( Retrying in 5 Seconds..."
-            time.sleep(5)
+            print "\n*****There seem to be connection problem! :-( Retrying in 30 Seconds..."
+            time.sleep(30)
             continue
         for item in pubsub.listen():
             try:
@@ -245,4 +250,3 @@ def receive(channel):
                    
 if __name__ == '__main__':
     receive(tenant_name+"-info")
-
