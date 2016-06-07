@@ -114,7 +114,12 @@ def set_docker_info():
                 service_name=get_service(port_list,data["Config"]["Labels"])
                 docker_info.append({"cid":ids[:12],"cname":data["Name"].lstrip("/"),"hostname":hostname,"pid":data["State"]["Pid"],"ip":ip_addresses,"image":data["Config"]["Image"],"Tenant_Name":tenant_name,"labels":data["Config"]["Labels"],"service":service_name})
     json_data=json.dumps(docker_info)              
-    r = redis.StrictRedis(**config)
+    try:
+        r = redis.StrictRedis(**config)
+    except Exception:
+        print "*****Connection problem at REDIS. Will try in 30 sec!"
+        time.sleep(30)
+        raise Exception
     r.hset(tenant_name+"-info",hostname,global_container_data)
     time.sleep(3)
     cluster_info=r.hgetall(tenant_name+"-info")
@@ -183,13 +188,19 @@ def parse_contrack():
               "srctenant":tenant_name,
               "dsttenant":tenant_name}
         dependency.append(data)
-    json_data=json.dumps(dependency)
     print "=================== Docker Dependencies ===================\n"
-    if not json_data:
-        json_data=[{"dsttenant":tenant_name}]
+    if not dependency:
+        json_data=json.dumps([{"tenant":tenant_name}])
         print "No Traffic Found!"
+    else:
+        json_data=json.dumps(dependency)
     print json_data
-    response = requests.post(dependency_url, data=json_data,headers=headers)
+    try:
+        response = requests.post(dependency_url, data=json_data,headers=headers)
+    except Exception:
+        print "*****Connection Problem at REST API. Will retry in 30 Sec"
+        time.sleep(30)
+        raise Exception
     print response
     
                   
